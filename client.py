@@ -8,6 +8,14 @@ if len(sys.argv) <= 1:
 # Create a server socket, bind it to a port and start listening 
 tcpSerSock = socket(AF_INET, SOCK_STREAM)
 # Fill in start.
+serverPort = 80
+try:
+    tcpSerSock.bind((gethostname, serverPort))
+except socket.error as message:
+    print('Failed binding:', str(message[0], message[1]))
+    sys.exit()
+
+tcpSerSock.listen(5) # change to how many
 # Fill in end.
 
 while 1:
@@ -45,6 +53,7 @@ while 1:
             try:
                 # Connect to the socket to port 80
                 # Fill in start. 
+                tcpSerSock.connect((hostn, 80))
                 # Fill in end.
                 # Create a temporary file on this socket and ask port 80 for the file requested by the client
                 fileobj = c.makefile('r', 0)
