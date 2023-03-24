@@ -8,14 +8,15 @@ if len(sys.argv) <= 1:
 # Create a server socket, bind it to a port and start listening 
 tcpSerSock = socket(AF_INET, SOCK_STREAM)
 # Fill in start.
-serverPort = 80
+serverHost = '127.0.0.1'
+serverPort = 12000 ###change as needed
 try:
-    tcpSerSock.bind((gethostname, serverPort))
-except socket.error as message:
-    print('Failed binding:', str(message[0], message[1]))
+    tcpSerSock.bind((serverHost, serverPort))
+except:
+    print('Binding error')
     sys.exit()
 
-tcpSerSock.listen(5) # change to how many
+tcpSerSock.listen()
 # Fill in end.
 
 while 1:
@@ -23,7 +24,8 @@ while 1:
     print('Ready to serve...')
     tcpCliSock, addr = tcpSerSock.accept() 
     print('Received a connection from:', addr) 
-    message = # Fill in start. # Fill in end.
+    ###issue with message below
+    message = tcpCliSock.sendto(('test').encode(), (serverHost, serverPort)) # Fill in start. # Fill in end.
     print(message)
     # Extract the filename from the given message 
     print(message.split()[1])
@@ -47,7 +49,7 @@ while 1:
     except IOError:
         if fileExist == "false":
             # Create a socket on the proxyserver
-            c = # Fill in start. # Fill in end. 
+            ###c = # Fill in start. # Fill in end. 
             hostn = filename.replace("www.","",1) 
             print(hostn)
             try:
@@ -72,6 +74,7 @@ while 1:
         else:
             # HTTP response message for file not found
             # Fill in start. # Fill in end.
+            print('test remove this') ###
     # Close the client and the server sockets
 tcpCliSock.close()
 # Fill in start. 
