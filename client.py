@@ -19,7 +19,20 @@ except:
 tcpSerSock.listen()
 # Fill in end.
 
+received_req = 0
+get_traffic = 0
+read_cache = 0
+cache_traffic_reduce = 0
 while 1:
+    # Print Statistics
+    if received_req != 0:
+        cache_traffic_reduce = (read_cache/received_req)*100
+    print('\n-----------------------------------------------')
+    print('Statistics')
+    print('Number of Received Requests:', received_req)
+    print('Total size of GET traffic:', get_traffic)
+    print('Percentage of traffic reduction with cache', cache_traffic_reduce, '%')
+    print('-----------------------------------------------\n')
     # Start receiving data from the client
     print('Ready to serve...')
     tcpCliSock, addr = tcpSerSock.accept()
@@ -35,7 +48,7 @@ while 1:
     filetouse = "/" + filename
     print(filetouse)
     try:
-        # Check wether the file exist in the cache
+        # Check whether the file exist in the cache
         f = open(filetouse[1:], "r")
         outputdata = f.readlines()
         fileExist = "true"
@@ -46,7 +59,9 @@ while 1:
         page = f.read()
         tcpCliSock.send(bytes(page, 'utf-8'))
         #Fill in end.
-        print('Read from cache')
+        print('\n\n----------Read from cache----------')
+        read_cache += 1
+        received_req += 1
     # Error handling for file not found in cache
     except IOError:
         if fileExist == "false":
@@ -61,12 +76,14 @@ while 1:
                 # Fill in end.
                 # Create a temporary file on this socket and ask port 80 for the file requested by the client
                 fileobj = c.makefile('rw')
-                fileobj.write("GET "+"http://" + filename + " HTTP/1.1\n\n")
+                fileobj.write("GET / HTTP/1.0\r\nHost: " + filename + "\r\n\r\n")
                 # Read the response into buffer
                 # Fill in start.
                 fileobj.flush()
                 page = fileobj.read()
+                get_traffic += len(page)
                 page = bytes(page, 'utf-8')
+                #get_traffic += len(page)
                 # Fill in end.
                 # Create a new file in the cache for the requested file.
                 # Also send the response in the buffer to client socket and the
@@ -77,6 +94,7 @@ while 1:
                 tcpCliSock.send(bytes("HTTP/1.0 200 OK\r\n", 'utf-8'))
                 tcpCliSock.send(bytes("Content-Type:text/html\r\n", 'utf-8'))
                 tcpCliSock.send(page)
+                received_req += 1
                 #Fill in start.
                 # Fill in end.
             except Exception as e:
