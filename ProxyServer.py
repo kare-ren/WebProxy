@@ -3,11 +3,13 @@ from threading import Timer
 import sys
 import os
 
+# Initiates delete process for cached files after 60 seconds
 def startDelete(fileToDelete):
     print("Setting a timer to delete " + fileToDelete)
     t = Timer(60, lambda: deleteFile(fileToDelete))
     t.start()
 
+# Deletes cached files
 def deleteFile(fileToDelete):
     try:
         print("Removing " + fileToDelete)
@@ -16,6 +18,7 @@ def deleteFile(fileToDelete):
         print(fileToDelete + "not deleted:")
         print(e)
 
+# Checks if cache is full
 def checkCacheSize(size):
     for path, dirs, files in os.walk('.'):
         for f in files:
@@ -26,14 +29,14 @@ def checkCacheSize(size):
     return True if size < cache_size else False
 
 if len(sys.argv) < 3:
-    print('Usage : "python ProxyServer.py server_ip cache_size"\n[server_ip] : It is the IP Address Of Proxy Server\n[cache_size] : Size of the cache in bytes')
+    print('Usage : "python3 ProxyServer.py server_ip cache_size"\n[server_ip] : It is the IP Address Of Proxy Server\n[cache_size] : Size of the cache in bytes')
     sys.exit(2)
 
 # Create a server socket, bind it to a port and start listening
 tcpSerSock = socket(AF_INET, SOCK_STREAM)
 # Fill in start.
 serverHost = sys.argv[1]
-serverPort = 12000 ###change as needed
+serverPort = 12000 # Change as needed
 cache_size = int(sys.argv[2])
 
 try:
@@ -64,8 +67,7 @@ while 1:
     print('Ready to serve...')
     tcpCliSock, addr = tcpSerSock.accept()
     print('Received a connection from:', addr)
-    ###issue with message below
-    message = tcpCliSock.recv(1024).decode()#tcpCliSock.sendto(('test').encode(), (serverHost, serverPort)) # Fill in start. # Fill in end.
+    message = tcpCliSock.recv(1024).decode() # Fill in start. # Fill in end.
     print(message)
     # Extract the filename from the given message
     print(message.split()[1])
@@ -110,7 +112,6 @@ while 1:
                 page = fileobj.read()
                 get_traffic += len(page)
                 page = bytes(page, 'utf-8')
-                #get_traffic += len(page)
                 # Fill in end.
                 # Create a new file in the cache for the requested file.
                 # Also send the response in the buffer to client socket and the
@@ -126,7 +127,7 @@ while 1:
                 tcpCliSock.send(bytes("Content-Type:text/html\r\n", 'utf-8'))
                 tcpCliSock.send(page)
                 received_req += 1
-                #Fill in start.
+                # Fill in start.
                 # Fill in end.
             except Exception as e:
                 print("Illegal request")
@@ -138,4 +139,4 @@ while 1:
     # Close the client and the server sockets
 tcpCliSock.close()
 # Fill in start.
-# # Fill in end.
+# Fill in end.
