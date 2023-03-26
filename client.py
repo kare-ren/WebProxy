@@ -1,15 +1,41 @@
 from socket import *
+from threading import Timer
 import sys
+import os
 
-if len(sys.argv) <= 1:
-    print('Usage : "python ProxyServer.py server_ip"\n[server_ip : It is the IP Address Of Proxy Server')
+def startDelete(fileToDelete):
+    print("Setting a timer to delete " + fileToDelete)
+    t = Timer(60, lambda: deleteFile(fileToDelete))
+    t.start()
+
+def deleteFile(fileToDelete):
+    try:
+        print("Removing " + fileToDelete)
+        os.remove(fileToDelete)
+    except Exception as e:
+        print(fileToDelete + "not deleted:")
+        print(e)
+
+def checkCacheSize(size):
+    for path, dirs, files in os.walk('.'):
+        for f in files:
+            if(f != 'client.py' and f != 'README.md'):
+                fp = os.path.join(path, f)
+                size += os.path.getsize(fp)
+
+    return True if size < cache_size else False
+
+if len(sys.argv) < 3:
+    print('Usage : "python ProxyServer.py server_ip cache_size"\n[server_ip] : It is the IP Address Of Proxy Server\n[cache_size] : Size of the cache in bytes')
     sys.exit(2)
 
 # Create a server socket, bind it to a port and start listening
 tcpSerSock = socket(AF_INET, SOCK_STREAM)
 # Fill in start.
-serverHost = '127.0.0.1'
+serverHost = sys.argv[1]
 serverPort = 12000 ###change as needed
+cache_size = int(sys.argv[2])
+
 try:
     tcpSerSock.bind((serverHost, serverPort))
 except:
@@ -89,9 +115,13 @@ while 1:
                 # Create a new file in the cache for the requested file.
                 # Also send the response in the buffer to client socket and the
                 # corresponding file in the cache
-                tmpFile = open("./" + filename,"wb")
-                tmpFile.write(page)
-                tmpFile.close()
+                if(checkCacheSize(len(page))):
+                    tmpFile = open("./" + filename,"wb")
+                    tmpFile.write(page)
+                    tmpFile.close()
+                    startDelete(filename)
+                else:
+                    print("Cache Full: " + filename + " not added to cache.")
                 tcpCliSock.send(bytes("HTTP/1.0 200 OK\r\n", 'utf-8'))
                 tcpCliSock.send(bytes("Content-Type:text/html\r\n", 'utf-8'))
                 tcpCliSock.send(page)
