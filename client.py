@@ -31,6 +31,7 @@ while 1:
     print('Statistics')
     print('Number of Received Requests:', received_req)
     print('Total size of GET traffic:', get_traffic)
+    print('Number of Local Hits:', read_cache)
     print('Percentage of traffic reduction with cache', cache_traffic_reduce, '%')
     print('-----------------------------------------------\n')
     # Start receiving data from the client
